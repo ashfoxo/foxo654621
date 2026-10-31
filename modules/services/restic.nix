@@ -80,7 +80,6 @@ lib.mkIf cfg.enable {
       "/home/arlo/media"               # media library
       "/home/arlo/torrents"            # torrent downloads (qBittorrent)
       "/home/arlo/.local/share/Trash"  # deleted files
-      "/home/arlo/.local/share/baloo"  # KDE file index, rebuilds itself
     ] ++ cfg.extraExclude;
 
     # Also skip any directory containing a CACHEDIR.TAG file, which is the

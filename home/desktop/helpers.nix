@@ -1,12 +1,12 @@
 { pkgs, lib, config, osConfig, ... }:
 
-# Everything around the compositor that Plasma would otherwise provide:
-# wallpaper, idle, launcher, automount, polkit agent, and the keybind
-# cheat sheet. Notifications are in quickshell.nix, the lock screen in
-# lockscreen.nix.
+# Everything around the compositor that a full desktop would otherwise
+# provide: wallpaper, idle, launcher, automount, polkit agent, and the
+# keybind cheat sheet. Notifications are in quickshell.nix, the lock screen
+# in lockscreen.nix.
 #
 # Every service here binds to hyprland-session.target (set in hyprland.nix
-# via wayland.systemd.target), so none of it runs under Plasma.
+# via wayland.systemd.target), so it starts and stops with Hyprland.
 
 let
   target = config.wayland.systemd.target;
@@ -132,17 +132,17 @@ in
     enable = true;
     automount = true;
     notify = true;
-    tray = "never"; # mounts show up in yazi or Dolphin; no tray icon needed
+    tray = "never"; # mounts show up in yazi; no tray icon needed
   };
-  # Home Manager binds udiskie to graphical-session.target, which Plasma
-  # starts too. Pin it to the Hyprland session.
+  # Home Manager binds udiskie to graphical-session.target. Pin it to the
+  # Hyprland session like everything else here.
   systemd.user.services.udiskie = {
     Unit.PartOf = lib.mkForce [ target ];
     Unit.After = lib.mkForce [ target ];
     Install.WantedBy = lib.mkForce [ target ];
   };
 
-  ##### Polkit agent (Plasma brings its own) #####
+  ##### Polkit agent (asks for your password when an app needs root) #####
   services.hyprpolkitagent.enable = true;
 
   home.packages = (with pkgs; [

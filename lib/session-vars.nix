@@ -2,10 +2,10 @@
 #
 # This is a plain attrset, not a module. It is `import`ed by:
 #   - modules/desktop/session.nix -> environment.sessionVariables (TTY / PAM logins)
-#   - home/default.nix            -> home.sessionVariables (bash) and the Plasma env script
+#   - home/default.nix            -> home.sessionVariables (bash)
 #   - home/desktop/hyprland.nix   -> Hyprland `env` (with $HOME expanded to a real path)
 #
-# Change a value here and all four places follow.
+# Change a value here and all three places follow.
 {
   SSH_AUTH_SOCK = "$HOME/.bitwarden-ssh-agent.sock";
 

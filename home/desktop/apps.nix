@@ -50,7 +50,7 @@ in
     # --- Writing and notes -------------------------------------------------
     pkgs.notesnook
     pkgs.typora
-    pkgs.libreoffice-qt6
+    pkgs.libreoffice           # GTK build, matches the GTK file picker
 
     # --- Creative ------------------------------------------------------------
     pkgs.darktable
@@ -74,7 +74,6 @@ in
 
     # --- Tools -------------------------------------------------------------
     pkgs.ghostty
-    pkgs.kdePackages.dolphin   # backup file manager; yazi is the default (defaults.nix)
     pkgs.vscodium
     pkgs.qdirstat              # disk usage map
   ]

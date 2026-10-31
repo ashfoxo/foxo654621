@@ -6,8 +6,8 @@
   home-manager.extraSpecialArgs = { inherit (inputs) nixpak; };
   home-manager.users.arlo = import ../home;
 
-  # First activation almost always collides with files Plasma or the
-  # installer already wrote (~/.config/... etc). With this, the
-  # offender is renamed to *.hm-backup and the build continues.
+  # Home Manager refuses to replace files it didn't write (an app's own
+  # ~/.config/... file, say). With this, the offender is renamed to
+  # *.hm-backup and the switch continues.
   home-manager.backupFileExtension = "hm-backup";
 }

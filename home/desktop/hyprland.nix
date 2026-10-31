@@ -21,14 +21,15 @@ let
   colors = (import ../../lib/palette.nix).for "hyprland";
   scratchpads = import ./scratchpads.nix;
 
-  # Set only inside Hyprland. Plasma sets these itself. Hosts add their own
-  # (e.g. NVIDIA's) through fox.desktop.hyprlandEnv.
+  # Set only inside Hyprland. Hosts add their own (e.g. NVIDIA's) through
+  # fox.desktop.hyprlandEnv.
   hyprlandOnlyVars = osConfig.fox.desktop.hyprlandEnv // {
-    # Qt apps (Dolphin, etc.) read Plasma's Breeze Dark settings.
-    QT_QPA_PLATFORMTHEME = "kde";
-    # Same cursor as Plasma.
-    XCURSOR_THEME = "breeze_cursors";
-    XCURSOR_SIZE = "24";
+    # Qt apps take their look from qt5ct / qt6ct (theme.nix). qt6ct answers
+    # to "qt5ct" too, so this one value covers Qt 5 and Qt 6 apps.
+    QT_QPA_PLATFORMTHEME = "qt5ct";
+    # The cursor set in theme.nix.
+    XCURSOR_THEME = config.home.pointerCursor.name;
+    XCURSOR_SIZE = toString config.home.pointerCursor.size;
   };
 
   # Hyprland's env can't expand $HOME, so it's substituted here.
@@ -46,8 +47,8 @@ let
   luaModules = [ "env" "looks" "input" "binds" "rules" "webapps" ];
 in
 {
-  # Send every Wayland helper service (quickshell, hypridle, hyprpaper,
-  # ...) to the Hyprland session only, so none of them spawn under Plasma.
+  # Tie every Wayland helper service (quickshell, hypridle, hyprpaper, ...)
+  # to the Hyprland session, so they start and stop with it.
   # Requires wayland.windowManager.hyprland.systemd.enable (set below).
   wayland.systemd.target = "hyprland-session.target";
 
@@ -63,7 +64,7 @@ in
     systemd.enable = true;  # provides hyprland-session.target
 
     # Start XDG autostart entries (Mullvad, NetBird UI, ...) so their tray
-    # icons appear. Entries marked OnlyShowIn=KDE stay Plasma-only.
+    # icons appear.
     systemd.enableXdgAutostart = true;
 
     # Appended to the generated hyprland.lua. Order matters: palette and env

@@ -1,4 +1,4 @@
-# A graphical machine: Plasma + Hyprland, audio, fonts, common hardware
+# A graphical machine: Hyprland, audio, fonts, common hardware
 # support and the system-wide apps. The per-user side (Hyprland config,
 # the bar, apps) is in home/desktop/.
 {

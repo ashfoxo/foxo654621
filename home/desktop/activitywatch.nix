@@ -3,8 +3,8 @@
 # ActivityWatch: time tracking on the laptop, plus the phone's data, in one
 # dashboard at http://localhost:5600 (launcher: "ActivityWatch").
 #
-#   awatcher     tracks the focused window and AFK time (works on Hyprland
-#                and Plasma; the stock window watcher doesn't do Wayland)
+#   awatcher     tracks the focused window and AFK time (works on Hyprland;
+#                the stock window watcher doesn't do Wayland)
 #   aw-server    stores it, serves the dashboard
 #   aw-fetch     copies the phone's sync folder over SSH, then imports it.
 #                Runs every 30 minutes on its own, or run it by hand.
@@ -73,8 +73,8 @@ in
     watchers.awatcher.package = pkgs.awatcher;
   };
 
-  # awatcher needs a running desktop. Start it with whichever session you
-  # log into (Hyprland or Plasma), not at boot, and retry if it starts early.
+  # awatcher needs a running desktop. Start it with the graphical session,
+  # not at boot, and retry if it starts early.
   systemd.user.services.activitywatch-watcher-awatcher = {
     Unit = {
       After = lib.mkForce [ "activitywatch.service" "graphical-session.target" ];

@@ -32,11 +32,14 @@ you forgot to persist something. Unlocking the disk works with a FIDO2 key
 (YubiKey) or a passphrase.
 
 **A keyboard-driven desktop.** [Hyprland](https://hypr.land) (configured in
-Lua) with a Quickshell bar and notifications, fuzzel, hyprlock and hypridle, all coloured from one
-palette in `lib/palette.nix`. KDE Plasma 6 is installed too, as a fallback
-you can pick at the login screen. Press `Super + /` for a cheat sheet that
-reads the keybinds straight from the running compositor, so it can't go out
-of date.
+Lua) with a Quickshell bar and notifications, fuzzel, hyprlock and
+hypridle, all coloured from one palette in `lib/palette.nix`, which also
+colours Qt apps (through qt6ct) and the PDF viewer. greetd logs straight
+into Hyprland at boot and Hyprland locks itself, so the lock screen is the
+login. Default apps are keyboard-driven too: yazi for files (a scratchpad
+on `Super + E`), zathura, imv and mpv. Press `Super + /` for a cheat sheet
+that reads the keybinds straight from the running compositor, so it can't
+go out of date.
 
 **Sandboxed apps.** Browsers, chat apps, a torrent client and a Minecraft launcher run
 inside [nixpak](https://github.com/nixpak/nixpak) (bubblewrap) sandboxes.
@@ -84,13 +87,13 @@ modules/               System-level NixOS modules
   personal.nix           The bundle every laptop/desktop imports
   options.nix            The few knobs that differ per machine (fox.*)
   core/                  Nix settings, users, SSH, hardening, locale
-  desktop/               Plasma, Hyprland session, audio, fonts, system apps
+  desktop/               Login (greetd) and Hyprland session, audio, fonts, system apps
   hardware/              laptop.nix (power, thermals), nvidia.nix
   network/               Mullvad + NetBird, phone file transfer
   services/restic.nix    Backups
   boot.nix, impermanence.nix
 home/                  Home Manager config for the user
-  desktop/               Hyprland (hypr/*.lua), Quickshell bar, apps, sandboxes, lock screen
+  desktop/               Hyprland (hypr/*.lua), Quickshell bar, apps, sandboxes, lock screen, theme
 lib/                   Shared values: colour palette, session variables
 secrets/               sops-encrypted secrets for the laptop and desktop
 sops.sh                Wrapper for editing those secrets

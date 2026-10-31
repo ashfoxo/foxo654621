@@ -15,9 +15,9 @@
   };
 
   # Early KMS: load the driver in the initrd, so it owns the display before
-  # SDDM starts. Without this, SDDM's autologin starts Hyprland while the
-  # driver is still loading; Hyprland exits at once and SDDM falls back to
-  # its greeter, which then crashes too.
+  # the login manager (greetd) starts. Without it, the automatic login can
+  # start Hyprland while the driver is still loading, and Hyprland exits at
+  # once. (Seen with SDDM before greetd; the race is the same.)
   boot.initrd.kernelModules = [ "nvidia" "nvidia_modeset" "nvidia_uvm" "nvidia_drm" ];
 
   # VA-API (hardware video decode) on top of NVDEC, for browsers and mpv/VLC.

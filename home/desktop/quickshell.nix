@@ -9,8 +9,8 @@
 # and palette.nix. Nothing reads ~/.config/quickshell, so the whole shell is
 # rebuilt from this repo.
 #
-# Runs as a user service tied to the Hyprland session, like Waybar did, so
-# it never starts under Plasma. A rebuild restarts it on the new files.
+# Runs as a user service tied to the Hyprland session. A rebuild restarts
+# it on the new files.
 #   Logs:    journalctl --user -u quickshell -f
 #   Restart: systemctl --user restart quickshell
 # Docs: https://quickshell.org/docs/

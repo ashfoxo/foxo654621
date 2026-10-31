@@ -19,10 +19,8 @@
       "/var/lib/bluetooth"               # paired devices
       "/var/lib/upower"                  # battery history
       "/var/lib/power-profiles-daemon"
-      "/var/lib/sddm"                    # remembered last user/session
       "/var/lib/fwupd"                   # firmware update history
       "/var/lib/restic-status"           # last successful backup (lock screen)
-      "/var/lib/AccountsService"         # Plasma/SDDM user metadata
       "/etc/NetworkManager/system-connections"
       "/etc/mullvad-vpn"
       "/var/cache/mullvad-vpn"

@@ -1,34 +1,50 @@
+{ config, pkgs, ... }:
 let
   # Shared with home/default.nix and hyprland.nix. Edit lib/session-vars.nix.
   sessionVars = import ../../lib/session-vars.nix;
+
+  startHyprland = "${config.programs.hyprland.package}/bin/start-hyprland";
 in
 {
-  ##### Desktop #####
-  services.desktopManager.plasma6.enable = true;
-  services.displayManager.sddm = {
+  ##### Login #####
+  # greetd starts Hyprland as arlo at boot, and Hyprland locks itself
+  # straight away (hyprland.nix), so the lock screen is the real login.
+  # initial_session runs once per boot. After a log out, or if Hyprland
+  # exits, default_session shows a text login (tuigreet) that starts
+  # Hyprland again.
+  services.greetd = {
     enable = true;
-    wayland.enable = true;
+    settings = {
+      initial_session = {
+        command = startHyprland;
+        user = "arlo";
+      };
+      default_session = {
+        command = "${pkgs.tuigreet}/bin/tuigreet --time --asterisks --cmd ${startHyprland}";
+        user = "greeter";
+      };
+    };
   };
-
-  # Boot straight into Hyprland, which then locks itself (hyprland.nix)
-  services.displayManager.autoLogin = {
-    enable = true;
-    user = "arlo";
-  };
-  services.displayManager.defaultSession = "hyprland";
 
   programs.hyprland = {
     enable = true;
     xwayland.enable = true;
   };
 
-  # Portals under Hyprland: its own portal for screenshots/screencast, KDE's
-  # for file pickers (Hyprland's has none) and settings like dark mode. Your
+  ##### Desktop services the bar relies on #####
+  services.upower.enable = true;                # the bar's battery
+  services.power-profiles-daemon.enable = true; # the bar's power profile button
+
+  # Portals: Hyprland's own for screenshots and screencast, GTK's for file
+  # pickers (Hyprland's has none) and for telling apps to use dark mode
+  # (read from the color-scheme setting in home/desktop/theme.nix). Your
   # nixpak apps open files through the FileChooser portal, so this matters.
-  # Plasma keeps its own portal config; this file only applies to Hyprland.
-  xdg.portal.config.hyprland = {
-    default = [ "hyprland" "kde" ];
-    "org.freedesktop.impl.portal.FileChooser" = [ "kde" ];
+  xdg.portal = {
+    extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
+    config.hyprland = {
+      default = [ "hyprland" "gtk" ];
+      "org.freedesktop.impl.portal.FileChooser" = [ "gtk" ];
+    };
   };
 
   # PAM services
@@ -41,7 +57,9 @@ in
     u2fAuth = true;
     gnupg.enable = true;
   };
-  security.pam.services.sddm.gnupg.enable = true;
+  # A password typed at tuigreet unlocks GPG too. (The boot-time automatic
+  # login types none, so there the hyprlock unlock does it.)
+  security.pam.services.greetd.gnupg.enable = true;
 
   environment.sessionVariables = sessionVars;
 }

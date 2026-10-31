@@ -52,13 +52,13 @@ end
 ---- MISC -----
 ---------------
 
--- File pickers (the KDE portal's open/save dialogs, used by sandboxed and
+-- File pickers (the GTK portal's open/save dialogs, used by sandboxed and
 -- Electron apps): floating and centered. A new window opens inside a
 -- showing scratchpad, but tiled, and tiled windows sit under floating ones,
 -- so without this the picker hides behind the scratchpad app.
 hl.window_rule({
     name   = "file-picker",
-    match  = { class = "^(xdg-desktop-portal-kde|org\\.freedesktop\\.impl\\.portal\\.desktop\\.kde)$" },
+    match  = { class = "^xdg-desktop-portal-gtk$" },
     float  = true,
     size   = "monitor_w*0.6 monitor_h*0.7",
     center = true,

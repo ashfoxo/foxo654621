@@ -5,12 +5,12 @@
 #
 # The viewers are keyboard-driven:
 #   zathura  PDFs    j/k scroll, / search, + - zoom, Ctrl + R dark pages
-#   imv      images  arrows next/prev, + - zoom, f fullscreen
+#   imv      images  arrows next/prev in the folder, + - zoom, f fullscreen
 #   mpv      media   space pause, arrows seek, [ ] speed
 #   yazi     files   hjkl move, enter open, q quit (also Super + E, a
 #                    scratchpad: scratchpads.nix)
 # Archives have no default: unpack them in the terminal.
-# Dolphin and VLC stay installed as backups (apps.nix), not as defaults.
+# VLC stays installed as a backup player (apps.nix), not as a default.
 #
 # Check what opens a file type:  xdg-mime query default application/pdf
 # Find a type for a file:        xdg-mime query filetype somefile.pdf
@@ -21,7 +21,7 @@ let
   browser = "mullvad-browser.desktop";
   # zathura's PDF support is a plugin with its own entry; same zathura.
   pdf     = "org.pwmt.zathura-pdf-mupdf.desktop";
-  image   = "imv.desktop";
+  image   = "imv-dir.desktop";   # opens the whole folder: arrows flip through it
   media   = "mpv.desktop";
   text    = "codium.desktop";
   folder  = "yazi-folder.desktop";   # defined below
@@ -156,12 +156,11 @@ in
   # a default you set by clicking, add it above.
   xdg.configFile."mimeapps.list".force = true;
 
-  # Dolphin (and other KDE apps) find installed apps through a menu file
-  # that only Plasma provides, so outside Plasma they think nothing can open
+  # KDE apps (kdenlive) find installed apps through a menu file that only a
+  # KDE desktop provides, so without one they think nothing can open
   # anything ("no default program"). This is the plain menu they look for:
-  # every installed app, no categories. Plasma uses its own
-  # plasma-applications.menu, so this doesn't change anything there.
-  # If Dolphin still shows nothing after a rebuild, run `kbuildsycoca6` once.
+  # every installed app, no categories. If kdenlive still shows nothing
+  # after a rebuild, run `kbuildsycoca6` once.
   xdg.configFile."menus/applications.menu".text = ''
     <!DOCTYPE Menu PUBLIC "-//freedesktop//DTD Menu 1.0//EN"
       "http://www.freedesktop.org/standards/menu-spec/1.0/menu.dtd">

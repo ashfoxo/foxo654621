@@ -29,8 +29,8 @@
       Restart = "on-failure";
       RestartSec = 10;
     };
-    # Deliberately graphical-session.target, NOT hyprland-session.target --
-    # unlike the Quickshell bar, you want this running in the Plasma session too.
+    # graphical-session.target: starts with whatever graphical session you
+    # log into, not only Hyprland.
     Install.WantedBy = [ "graphical-session.target" ];
   };
 }
