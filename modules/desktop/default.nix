@@ -18,18 +18,8 @@
     fsType = "tmpfs";
     options = [ "size=25%" "nosuid" "nodev" ];
   };
-  # Caches of the apps that aren't sandboxed (vscodium, bitwarden, steam,
-  # fluent-reader, ...) go to RAM too, so they never reach the disk. They are
-  # rebuilt on demand: the first Nix eval and Steam shader pass after a boot
-  # are slower.
-  fileSystems."/home/arlo/.cache" = {
-    device = "none";
-    fsType = "tmpfs";
-    options = [ "size=10%" "nosuid" "nodev" ];
-  };
   systemd.tmpfiles.rules = [
     "d /run/sandbox-ram 0700 arlo users -"
-    "d /home/arlo/.cache 0700 arlo users -"
   ];
 
   ##### Audio #####

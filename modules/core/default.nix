@@ -7,6 +7,7 @@
     ./ssh.nix
     ./hardening.nix
     ./usbguard.nix
+    ./yubikey-removal.nix
   ];
 
   time.timeZone = "America/New_York";

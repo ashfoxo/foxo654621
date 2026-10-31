@@ -6,8 +6,11 @@
   boot.initrd.systemd.initrdBin = with pkgs; [ btrfs-progs findutils ];
 
   ##### Impermanence #####
-  # @root is recreated empty every boot. @home is a separate subvolume and is
-  # never touched, so everything under /home/arlo survives.
+  # @root is recreated empty every boot. /home/arlo is a tmpfs too
+  # (ephemeral-home.nix); the @home subvolume under it is not touched.
+  # Not persisted on purpose: Wi-Fi networks, Bluetooth pairings and battery
+  # history would record where you have been and when. Re-enter / re-pair after
+  # each boot.
   environment.persistence."/persist" = {
     hideMounts = true;
     directories = [
@@ -15,12 +18,9 @@
       "/var/lib/systemd/timers"
       "/var/lib/systemd/backlight"       # brightness
       "/var/lib/systemd/rfkill"          # wifi/bluetooth soft-block state
-      "/var/lib/bluetooth"               # paired devices
-      "/var/lib/upower"                  # battery history
       "/var/lib/power-profiles-daemon"
       "/var/lib/fwupd"                   # firmware update history
       "/var/lib/restic-status"           # last successful backup (lock screen)
-      "/etc/NetworkManager/system-connections"
       "/etc/mullvad-vpn"
       "/var/cache/mullvad-vpn"
       {

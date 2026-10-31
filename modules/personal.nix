@@ -8,6 +8,7 @@
     ./core
     ./boot.nix
     ./impermanence.nix
+    ./ephemeral-home.nix
     ./desktop
     ./network/vpn.nix
     ./network/phone.nix

@@ -41,6 +41,12 @@ on `Super + E`), zathura, imv and mpv. Press `Super + /` for a cheat sheet
 that reads the keybinds straight from the running compositor, so it can't
 go out of date.
 
+**A home that forgets.** `/home/arlo` is a tmpfs and is empty at every boot.
+Only the folders listed in `modules/ephemeral-home.nix` survive (they live in
+`/persist/home/arlo`). Pull the YubiKey and the screen locks; if it isn't
+back in 10 seconds the machine powers off. `Super + Ctrl + Shift + Esc`
+powers off at once, key or no key.
+
 **Sandboxed apps.** Browsers, chat apps, a torrent client and a Minecraft launcher run
 inside [nixpak](https://github.com/nixpak/nixpak) (bubblewrap) sandboxes.
 Each app gets its own fake home and a single shared folder. Most homes live
