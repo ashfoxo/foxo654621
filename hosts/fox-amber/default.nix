@@ -12,6 +12,8 @@
   fox.machine = "fox-amber";
 
   fox.backup.repository = "s3:https://s3.fr-par.scw.cloud/bagger-amber/fox-amber";
+  # Its own Scaleway API key: fox-amber-s3-* in secrets.yaml.
+  fox.backup.s3SecretPrefix = "fox-amber-";
 
   # TRANSITION: the laptop's own host key, which secrets.yaml was encrypted
   # to before the shared key existed. Keeps the laptop decrypting while the

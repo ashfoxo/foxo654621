@@ -3,14 +3,13 @@
 # Daily encrypted backups of irreplaceable state to a Scaleway Object Storage
 # bucket (S3-compatible, Paris region).
 #
-# Needs these three keys in secrets.yaml (edited via sops):
-#   restic-password       - repository encryption password (also kept in Bitwarden)
-#   s3-access-key-id      - Scaleway API access key
-#   s3-secret-access-key  - Scaleway API secret key
-#
-# A host with its own Scaleway key sets fox.backup.s3SecretPrefix, and its
-# two key names get that prefix (e.g. fox-blue-s3-access-key-id). The
-# repository password is shared. Per-host settings are in modules/options.nix.
+# Needs these keys in secrets.yaml (edited via sops), where <prefix> is the
+# host's fox.backup.s3SecretPrefix (e.g. "fox-blue-"):
+#   restic-password                - repository encryption password, shared by
+#                                    every host (also kept in Bitwarden)
+#   <prefix>s3-access-key-id       - that host's Scaleway API access key
+#   <prefix>s3-secret-access-key   - that host's Scaleway API secret key
+# Per-host settings are in modules/options.nix.
 { config, pkgs, lib, ... }:
 
 let
