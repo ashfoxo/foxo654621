@@ -184,36 +184,8 @@ in
     extraEnv = { QT_QPA_PLATFORM = "wayland"; };
   };
 
-  # --- Diagnostics ---
-  # gl-check: what graphics a sandbox sees, run inside the same kind of
-  # sandbox Prism gets. For finding why Minecraft draws on the CPU on
-  # NVIDIA (fox-blue). Installed only where sandboxGpuDevices is set.
-  gl-check = makeGuiSandbox {
-    name = "gl-check";
-    package = pkgs.writeShellApplication {
-      name = "gl-check";
-      runtimeInputs = with pkgs; [ coreutils findutils gnugrep mesa-demos ];
-      text = ''
-        echo "== devices"
-        ls -l /dev/nvidia* /dev/dri 2>&1 || true
-        echo "== NVIDIA's EGL plugin list (\$__EGL_EXTERNAL_PLATFORM_CONFIG_DIRS)"
-        ls "''${__EGL_EXTERNAL_PLATFORM_CONFIG_DIRS:-/etc/egl/egl_external_platform.d}/" 2>&1 || true
-        echo "== /proc/driver/nvidia"
-        head -1 /proc/driver/nvidia/version 2>&1 || true
-        echo "== environment"
-        env | grep -E '^(DISPLAY|WAYLAND_DISPLAY|XDG_SESSION_TYPE|__GLX|__EGL|LIBVA|NVD|GBM|LD_LIBRARY)' || true
-        echo "== driver libraries visible"
-        find /run/opengl-driver/lib -maxdepth 1 -name '*nvidia*' 2>&1 | head -5 || true
-        echo "== GLX (Minecraft on X11)"
-        glxinfo -B 2>&1 | head -15 || true
-        echo "== EGL (Minecraft on Wayland)"
-        eglinfo -B 2>&1 | grep -iE 'platform|vendor|renderer|error|fail' | head -20 || true
-      '';
-    };
-  };
-
   # --- Gaming ---
-  prismlauncher    = makeGuiSandbox { package = pkgs.prismlauncher;    name = "prismlauncher"; };
+  prismlauncher    = makeGuiSandbox { package = pkgs.prismlauncher;    name = "prismlauncher"; state = "disk"; };  # worlds; synced by syncthing.nix
 
   # --- Communication ---
   vesktop          = makeGuiSandbox { package = pkgs.vesktop;          name = "vesktop"; rawPipeWire = true; machineId = true; };

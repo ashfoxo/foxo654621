@@ -21,6 +21,34 @@
 # steam and fluent-reader (AppImage) can't be sandboxed this way.
 
 let
+  # qBittorrent's home is in RAM (sandboxes.nix), so its settings file is gone
+  # after every boot. Before each start, write the one setting that matters
+  # (downloads go to ~/torrents, which the sandbox binds from disk) if it is
+  # missing. The torrent list itself is forgotten at power-off.
+  qbittorrent = let
+    inner = sandboxes.qbittorrent;
+    conf = "/run/sandbox-ram/qbittorrent/.config/qBittorrent/qBittorrent.conf";
+    torrents = "${config.home.homeDirectory}/torrents";
+  in pkgs.symlinkJoin {
+    name = "qbittorrent-seeded";
+    paths = [ inner ];
+    postBuild = ''
+      rm "$out/bin/qbittorrent"
+      cat > "$out/bin/qbittorrent" <<'EOF'
+      #!${pkgs.runtimeShell}
+      mkdir -p ${torrents} "$(dirname ${conf})"
+      [ -e ${conf} ] || printf '[BitTorrent]\nSession\\DefaultSavePath=${torrents}\nSession\\TempPathEnabled=false\n' > ${conf}
+      exec ${inner}/bin/qbittorrent "$@"
+      EOF
+      chmod +x "$out/bin/qbittorrent"
+      for f in "$out"/share/applications/*.desktop; do
+        [ -e "$f" ] || continue
+        src=$(readlink -f "$f"); rm "$f"
+        sed -e "s|^Exec=[^ ]*|Exec=$out/bin/qbittorrent|" "$src" > "$f"
+      done
+    '';
+  };
+
   sandboxes = import ./sandboxes.nix {
     inherit pkgs nixpak;
     extraGpuDev = osConfig.fox.desktop.sandboxGpuDevices;
@@ -76,32 +104,13 @@ in
     pkgs.bitwarden-desktop
 
     # --- Downloads -----------------------------------------------------------
-    sandboxes.qbittorrent
+    qbittorrent
 
     # --- Tools -------------------------------------------------------------
     pkgs.ghostty
     pkgs.vscodium
     pkgs.qdirstat              # disk usage map
-  ]
-  # NVIDIA hosts: a diagnostic for graphics inside the sandboxes (sandboxes.nix).
-  ++ lib.optional (osConfig.fox.desktop.sandboxGpuDevices != [ ]) sandboxes.gl-check;
-
-  # qBittorrent saves to ~/torrents. Its settings file lives in its sandbox
-  # home and qBittorrent rewrites it, so instead of owning the file, set
-  # just these keys on every rebuild. (qBittorrent writes its settings when
-  # it quits, so quit it before the first rebuild after this change.)
-  home.activation.qbittorrentSavePath =
-    let
-      conf = "${config.home.homeDirectory}/.local/share/sandboxes/qbittorrent/.config/qBittorrent/qBittorrent.conf";
-      torrents = "${config.home.homeDirectory}/torrents";
-      set = section: key: value:
-        "run ${lib.getExe pkgs.crudini} --ini-options=nospace --set ${lib.escapeShellArg conf} ${section} ${lib.escapeShellArg key} ${lib.escapeShellArg value}";
-    in
-    lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-      run mkdir -p ${lib.escapeShellArg torrents} "$(dirname ${lib.escapeShellArg conf})"
-      ${set "BitTorrent" "Session\\DefaultSavePath" torrents}
-      ${set "BitTorrent" "Session\\TempPathEnabled" "false"}
-    '';
+  ];
 
   # VSCodium: no reopened windows, local file history or hot-exit backups, so
   # less of what you worked on is left in its folders. Merged into any

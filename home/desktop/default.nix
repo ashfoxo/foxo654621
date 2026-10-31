@@ -8,7 +8,6 @@
     ./quickshell.nix # bar and notifications
     ./webapps.nix    # sandboxed ungoogled-chromium web apps
     ./voicenotes.nix # Super + Shift + R: record and transcribe
-    ./activitywatch.nix # time tracking, laptop + phone
     ./defaults.nix   # default apps (what opens links and files)
     ./theme.nix      # GTK, Qt and cursor look
     ./filen.nix

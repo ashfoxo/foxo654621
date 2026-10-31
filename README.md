@@ -69,7 +69,6 @@ yearly snapshots kept. The lock screen shows when the last one succeeded.
 **Small tools.**
 - `Super + Shift + R` records a voice note and transcribes it offline with
   whisper.cpp. `transcribe FILE` does the same for existing audio.
-- ActivityWatch time tracking, merged with data pulled from a phone.
 - `send` and `fetch` copy files to and from a phone over SSH.
 - A C toolchain with clangd, sanitizers and friends (`home/desktop/dev.nix`).
 
