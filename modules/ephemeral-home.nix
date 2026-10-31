@@ -15,6 +15,7 @@ let
   directories = [
     # --- Your files ---
     "Documents" "Downloads" "Pictures" "Videos" "Music" "media" "Filen"
+    "fox-den"           # this repo's checkout
     "tailnet"           # send / fetch with the phone
     "torrents"          # qBittorrent downloads
     "sandbox_folders"   # the shared folder of each sandboxed app
@@ -23,6 +24,7 @@ let
     # --- Keys ---
     { directory = ".ssh";   mode = "0700"; }
     { directory = ".gnupg"; mode = "0700"; }
+    { directory = ".config/Yubico"; mode = "0700"; }   # u2f_keys: sudo and lock screen with the key
 
     # --- Sandboxed apps that keep state (sandboxes.nix: state = "disk" / "logins") ---
     ".local/share/sandboxes/signal"
@@ -41,13 +43,16 @@ let
     ".local/share/kdenlive"
     ".config/feishin"
     ".config/fluent-reader"
-    ".config/filen-desktop" ".local/share/filen-desktop"
+    ".config/@filen" ".filen-cli"            # Filen login and CLI login
+    ".config/Electron"                       # Filen's IndexedDB (and any Electron app with the default name)
     ".local/share/Steam" ".steam"
     ".zoom"
     ".config/chirp"
     ".local/share/direnv"                    # which .envrc files you allowed
     ".config/syncthing" ".local/state/syncthing"
   ];
+
+  files = [ ".gitconfig" ];
 
   path = d: if builtins.isString d then d else d.directory;
 in
@@ -66,7 +71,7 @@ in
   # tmpfs mounts as root; hand the top folder to arlo before anything uses it.
   systemd.tmpfiles.rules = [ "d /home/arlo 0700 arlo users -" ];
 
-  environment.persistence."/persist".users.arlo = { inherit directories; };
+  environment.persistence."/persist".users.arlo = { inherit directories files; };
 
   # Login starts Hyprland as arlo straight away (modules/desktop/session.nix),
   # so Home Manager has to have written its files into the fresh home first.
@@ -93,7 +98,7 @@ in
         mkdir -p /mnt/@persist/home/arlo
         chown --reference=/mnt/@home/arlo /mnt/@persist/home/arlo || true
         cd /mnt/@home/arlo
-        for d in ${lib.escapeShellArgs (map path directories)}; do
+        for d in ${lib.escapeShellArgs (map path directories ++ files)}; do
           if [ -e "$d" ] && [ ! -e "/mnt/@persist/home/arlo/$d" ]; then
             cp -a --parents "$d" /mnt/@persist/home/arlo/ || true
           fi
