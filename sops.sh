@@ -6,8 +6,7 @@
 #   ./sops.sh updatekeys -y secrets/secrets.yaml secrets/phone-ssh-key.enc
 #                                                   re-encrypt after editing .sops.yaml
 #
-# KEY=/path/to/other_ed25519 ./sops.sh ...   uses a different SSH key, e.g. the
-# laptop's host key during the switch (README.md, step A2).
+# KEY=/path/to/other_ed25519 ./sops.sh ...   uses a different SSH key.
 #
 # The key is converted with ssh-to-age, because the secrets are encrypted to
 # its age form (the age1... keys in .sops.yaml), the same way sops-nix reads

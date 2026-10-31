@@ -15,11 +15,5 @@
   # Its own Scaleway API key: fox-amber-s3-* in secrets.yaml.
   fox.backup.s3SecretPrefix = "fox-amber-";
 
-  # TRANSITION: the laptop's own host key, which secrets.yaml was encrypted
-  # to before the shared key existed. Keeps the laptop decrypting while the
-  # switch happens. Remove this line, and the matching age key in
-  # .sops.yaml, once README.md step C5 is done.
-  sops.age.sshKeyPaths = [ "/persist/etc/ssh/ssh_host_ed25519_key" ];
-
   system.stateVersion = "26.05";
 }
