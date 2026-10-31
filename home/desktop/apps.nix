@@ -12,7 +12,7 @@
 #                                 apps outside Mullvad: Zoom and the clean Firefox
 #   helpers.nix        Hyprland helpers (launcher, bar, lock, screenshots)
 #   webapps.nix        Chromium web apps (Tuta, Claude, Gmail, ...)
-#   dev.nix, filen.nix, voicenotes.nix, activitywatch.nix
+#   dev.nix, filen.nix, voicenotes.nix
 
 # TODO(audit): the unsandboxed apps below (notesnook, typora, libreoffice,
 # darktable, kdenlive, feishin, zoom) could move into nixpak sandboxes, with
