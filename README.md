@@ -43,7 +43,10 @@ go out of date.
 
 **Sandboxed apps.** Browsers, chat apps, a torrent client and a Minecraft launcher run
 inside [nixpak](https://github.com/nixpak/nixpak) (bubblewrap) sandboxes.
-Each app gets its own fake home and a single shared folder. Web apps like
+Each app gets its own fake home and a single shared folder. Most homes live
+in RAM (`/run/sandbox-ram`, up to a quarter of memory) and are gone at
+power-off; Signal's stays on disk and LibreWolf keeps only its logins there
+(`state` in `home/desktop/sandboxes.nix`). Web apps like
 mail and a music player each get their own sandboxed Chromium window and
 profile (`home/desktop/webapps.nix`: add one line to the list and you get a
 command, a launcher entry and a workspace rule).

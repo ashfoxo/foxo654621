@@ -8,6 +8,18 @@
     ./programs.nix
   ];
 
+  ##### App state in RAM #####
+  # Home folders of the sandboxed apps that keep nothing on disk
+  # (home/desktop/sandboxes.nix). One shared pool, capped at a quarter of RAM;
+  # an app errors out if it fills up. zram is the only swap, so it never
+  # reaches the disk.
+  fileSystems."/run/sandbox-ram" = {
+    device = "none";
+    fsType = "tmpfs";
+    options = [ "size=25%" "nosuid" "nodev" ];
+  };
+  systemd.tmpfiles.rules = [ "d /run/sandbox-ram 0700 arlo users -" ];
+
   ##### Audio #####
   services.pipewire = {
     enable = true;

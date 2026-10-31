@@ -17,9 +17,13 @@ let
   # the pulse socket, and screen sharing gets its stream from the portal.
   # machineId: /etc/machine-id, a permanent unique ID for this laptop. Only
   # Electron apps get it, since they complain without it.
+  # state: where the app's home lives. "ram": in /run/sandbox-ram, gone at
+  # power-off. "disk": ~/.local/share/sandboxes/<name>, kept. "logins": the
+  # disk home, but ~/.cache is in RAM (the app itself must keep history and
+  # caches off, see librewolf below). /tmp is always in RAM.
   # extraBindRw: a function of sloth (nixpak's path helpers) returning more
   # read-write binds, e.g. sloth: [ [ host-path sandbox-path ] ].
-  makeGuiSandbox = { package, name, extraBindRw ? (sloth: []), extraDev ? [], extraEnv ? {}, rawPipeWire ? false, machineId ? false }:
+  makeGuiSandbox = { package, name, state ? "ram", extraBindRw ? (sloth: []), extraDev ? [], extraEnv ? {}, rawPipeWire ? false, machineId ? false }:
     (mkNixPak {
       config = { sloth, ... }: {
         app.package = package;
@@ -75,9 +79,11 @@ let
             # PulseAudio-compat socket (pipewire-pulse), used for mic and speakers
             (sloth.concat [ (sloth.env "XDG_RUNTIME_DIR") "/pulse" ])
 
-            # Isolate home directory state to ~/.local/share/sandboxes/<n>
+            # Isolate home directory state, in RAM or on disk (see state above)
             [
-              (sloth.mkdir (sloth.concat [ sloth.homeDir "/.local/share/sandboxes/" name ]))
+              (if state == "ram"
+               then sloth.mkdir (sloth.concat [ "/run/sandbox-ram/" name ])
+               else sloth.mkdir (sloth.concat [ sloth.homeDir "/.local/share/sandboxes/" name ]))
               sloth.homeDir
             ]
 
@@ -88,13 +94,18 @@ let
               (sloth.concat [ sloth.homeDir "/Shared" ])
             ]
 
-            # Per-app /tmp. bwrap gives the sandbox none by default, and apps
-            # that assume it exists can crash at startup (Feishin hangs on an
-            # error dialog). Host ~/.cache/sandbox-tmp/<n> -> sandbox /tmp
+            # Per-app /tmp, in RAM. bwrap gives the sandbox none by default, and
+            # apps that assume it exists can crash at startup (Feishin hangs on
+            # an error dialog). Host /run/sandbox-ram/<n>-tmp -> sandbox /tmp
             [
-              (sloth.mkdir (sloth.concat [ sloth.homeDir "/.cache/sandbox-tmp/" name ]))
+              (sloth.mkdir (sloth.concat [ "/run/sandbox-ram/" name "-tmp" ]))
               "/tmp"
             ]
+          ]
+          # Over the disk home, so caches never reach the disk.
+          ++ lib.optional (state == "logins") [
+            (sloth.mkdir (sloth.concat [ "/run/sandbox-ram/" name "-cache" ]))
+            (sloth.concat [ sloth.homeDir "/.cache" ])
           ]
           ++ lib.optional rawPipeWire (sloth.concat [ (sloth.env "XDG_RUNTIME_DIR") "/pipewire-0" ])
           ++ extraBindRw sloth;
@@ -133,7 +144,27 @@ in
     };
     name = "mullvad-browser";
   };
-  librewolf       = makeGuiSandbox { package = pkgs.librewolf;       name = "librewolf"; };
+  # The one browser that keeps logins across reboots. History, disk cache,
+  # session restore and form data are off, and cookies are not cleared at exit.
+  # shortcut: logins live in the on-disk profile; site storage persists with them.
+  librewolf = makeGuiSandbox {
+    package = pkgs.librewolf.override {
+      extraPrefs = ''
+        lockPref("places.history.enabled", false);
+        lockPref("browser.cache.disk.enable", false);
+        lockPref("browser.cache.offline.enable", false);
+        lockPref("browser.sessionstore.max_tabs_undo", 0);
+        lockPref("browser.sessionstore.resume_from_crash", false);
+        lockPref("browser.formfill.enable", false);
+        lockPref("browser.download.manager.addToRecentDocs", false);
+        lockPref("privacy.clearOnShutdown.cookies", false);
+        lockPref("privacy.clearOnShutdown_v2.cookiesAndStorage", false);
+        lockPref("network.cookie.lifetimePolicy", 0);
+      '';
+    };
+    name = "librewolf";
+    state = "logins";
+  };
 
   # Keyboard-driven browser. Its config (qutebrowser.py) is baked into the
   # package with --config-py, because the sandbox can't see ~/.config.
@@ -187,7 +218,8 @@ in
   # --- Communication ---
   vesktop          = makeGuiSandbox { package = pkgs.vesktop;          name = "vesktop"; rawPipeWire = true; machineId = true; };
   telegram-desktop = makeGuiSandbox { package = pkgs.telegram-desktop; name = "telegram"; };
-  signal-desktop   = makeGuiSandbox { package = pkgs.signal-desktop;   name = "signal"; machineId = true; };
+  # Signal's login and message database are one store: it stays on disk.
+  signal-desktop   = makeGuiSandbox { package = pkgs.signal-desktop;   name = "signal"; machineId = true; state = "disk"; };
 
   # --- Downloads ---
   # qBittorrent downloads into ~/torrents, the same path inside and outside

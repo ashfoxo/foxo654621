@@ -47,9 +47,9 @@
     "debugfs=off"
   ];
 
-  # FireWire is a DMA path into RAM; nothing here uses it. Thunderbolt is left
-  # alone (the laptop may dock over it): add "thunderbolt" here if it doesn't.
-  boot.blacklistedKernelModules = [ "firewire-core" "firewire-ohci" ];
+  # FireWire and Thunderbolt are DMA paths into RAM and nothing here uses them
+  # (the laptop's USB-C port only charges and carries plain USB data).
+  boot.blacklistedKernelModules = [ "firewire-core" "firewire-ohci" "thunderbolt" ];
 
   # Logs live in RAM only and vanish at power-off (nothing under /var/log is
   # persisted; see impermanence.nix).
