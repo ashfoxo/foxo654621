@@ -7,10 +7,14 @@
 
   networking.firewall.enable = true;
   # wt0 is not trusted. Peers get only the ports opened per port on wt0:
-  # just Syncthing's 22000 (services/syncthing.nix). Everything else this
+  # just Syncthing's 22000 (below). Everything else this
   # machine does over NetBird is outbound (send/fetch, Navidrome, Miniflux).
   # To allow more: networking.firewall.interfaces.wt0.allowedTCPPorts.
   networking.firewall.checkReversePath = "loose";
+
+  # Syncthing's sync port, open to NetBird peers only (home/desktop/syncthing.nix).
+  # The web UI stays on localhost.
+  networking.firewall.interfaces.wt0.allowedTCPPorts = [ 22000 ];
 
   services.mullvad-vpn = {
     enable = true;

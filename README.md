@@ -86,7 +86,7 @@ hosts/<name>/          One folder per machine: hardware + what's unique to it
 modules/               System-level NixOS modules
   personal.nix           The bundle every laptop/desktop imports
   options.nix            The few knobs that differ per machine (fox.*)
-  core/                  Nix settings, users, SSH, hardening, locale
+  core/                  Nix settings, users, SSH, hardening, USB allowlist, time zone
   desktop/               Login (greetd) and Hyprland session, audio, fonts, system apps
   hardware/              laptop.nix (power, thermals), nvidia.nix
   network/               Mullvad + NetBird, phone file transfer
@@ -177,7 +177,7 @@ If you want to adapt the whole thing, change these first:
 - `.sops.yaml` and `hosts/fox-red/.sops.yaml` hold the owner's public age
   keys. Put in yours and replace the files in `secrets/` with your own.
 - Backup buckets, domain names, NetBird addresses (`modules/network/phone.nix`)
-  and the time zone (`modules/core/locale.nix`) are the owner's.
+  and the time zone (`modules/core/default.nix`) are the owner's.
 - `hardware-configuration.nix` in each host folder is generated for that
   specific machine. Regenerate yours with `nixos-generate-config`.
 - Disk layout assumptions: a LUKS device named `cryptroot` containing btrfs

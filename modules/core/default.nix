@@ -7,6 +7,7 @@
     ./ssh.nix
     ./hardening.nix
     ./usbguard.nix
-    ./locale.nix
   ];
+
+  time.timeZone = "America/New_York";
 }

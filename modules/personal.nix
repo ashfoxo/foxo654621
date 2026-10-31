@@ -12,7 +12,6 @@
     ./network/vpn.nix
     ./network/phone.nix
     ./services/restic.nix
-    ./services/syncthing.nix
 
     inputs.impermanence.nixosModules.impermanence
     inputs.sops-nix.nixosModules.sops
