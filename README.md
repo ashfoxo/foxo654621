@@ -27,7 +27,7 @@ The server is separate and has [its own README](hosts/fox-red/README.md).
 **A wiped-every-boot root.** The disk is LUKS-encrypted btrfs with four
 subvolumes (`@root`, `@home`, `@nix`, `@persist`). At each boot `@root` is
 moved aside and replaced with an empty one, and only what's listed in
-`modules/impermanence.nix` survives. Old roots are kept for 30 days in case
+`modules/impermanence.nix` survives. Old roots are kept for 7 days in case
 you forgot to persist something. Unlocking the disk works with a FIDO2 key
 (YubiKey) or a passphrase.
 

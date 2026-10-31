@@ -6,6 +6,7 @@
     ./users.nix
     ./ssh.nix
     ./hardening.nix
+    ./usbguard.nix
     ./locale.nix
   ];
 }

@@ -6,6 +6,13 @@
   # never writes a boot entry into the machine's firmware (see fox-blue).
   boot.loader.efi.canTouchEfiVariables = lib.mkDefault true;
   boot.loader.systemd-boot.configurationLimit = 10;
+  # No editing the kernel command line from the boot menu.
+  boot.loader.systemd-boot.editor = false;
+
+  # TODO(later): Secure Boot with lanzaboote (own keys, signed UKIs), plus
+  # TPM2 or FIDO2 measured unlock, so /boot can't be swapped by an evil
+  # maid. Caveats: fox-blue boots from a USB SSD next to an untouched
+  # Windows drive, so key enrollment there needs care. Not started.
 
   # Modern systemd initrd. The root wipe lives in
   # boot.initrd.systemd.services.rollback (impermanence.nix).
@@ -27,10 +34,8 @@
   # rather than editing the generated file, so a regenerate can't undo it.
   fileSystems."/boot".options = lib.mkForce [ "umask=0077" ];
 
-  # Optional: pass TRIM through LUKS (small metadata-leak tradeoff). Uncomment
-  # both lines if you want it.
-  # boot.initrd.luks.devices."cryptroot".allowDiscards = true;
-  # services.fstrim.enable = true;
+  # TRIM through LUKS (allowDiscards) is off on purpose: it leaks which
+  # blocks are in use.
 
   # FIDO2 unlock: yak-olive (YubiKey Security Key C NFC) = keyslot 0
   # spare key = keyslot 3. Passphrase still works. On a host with no FIDO2
