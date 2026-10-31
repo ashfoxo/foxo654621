@@ -1,7 +1,7 @@
 # Single source of truth for colors. Plain attrset, like session-vars.nix.
 #
 # Usage in any module:
-#   colors = (import ../../lib/palette.nix).for "waybar";
+#   colors = (import ../../lib/palette.nix).for "fuzzel";
 #   colors.forest   # -> "255C2B"
 #
 # Values are bare hex (no #). Each consumer adds whatever wrapper its format
@@ -36,12 +36,10 @@ rec {
 
   # Per-app overrides. Each attrset is merged over `base`, so list only the
   # keys that change. For a completely different palette, give every key.
-  #   waybar = { forest = "2E7036"; };
+  #   fuzzel = { forest = "2E7036"; };
   apps = {
     hyprland = { };
-    waybar   = { };
     fuzzel   = { };
-    mako     = { };
     # Lock screen extra: a brighter rust for the failed-unlock border.
     hyprlock = {
       rust_glow = "9A4637";

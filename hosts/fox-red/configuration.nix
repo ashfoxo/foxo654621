@@ -1,4 +1,4 @@
-# NixOS configuration for fox-red (formerly redfox)
+# NixOS configuration for fox-red
 # Astro blog + Miniflux + ntfy + MollySocket + Navidrome
 # + Uptime Kuma + Forgejo, behind Caddy.
 #
