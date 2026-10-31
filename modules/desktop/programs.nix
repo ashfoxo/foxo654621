@@ -60,8 +60,10 @@ in
     enable = true;
     enableSSHSupport = false; # Bitwarden owns SSH_AUTH_SOCK
     settings = {
-      default-cache-ttl = 600;
-      max-cache-ttl = 7200;
+      # Asked once, then remembered for 8 hours (with or without the YubiKey).
+      # The unlocked key stays in RAM that long; a power-off clears it.
+      default-cache-ttl = 28800;
+      max-cache-ttl = 28800;
     };
   };
 
