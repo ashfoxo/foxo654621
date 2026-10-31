@@ -1,40 +1,87 @@
 { pkgs, lib, ... }:
 
 # Default apps: what opens when you click a link or a file (xdg-open,
-# Dolphin, links in other apps). Writes ~/.config/mimeapps.list.
+# links in other apps). Writes ~/.config/mimeapps.list.
 #
-# Keyboard-driven replacements are listed but commented out. To switch one
-# on: uncomment its package in home.packages AND its lines in the defaults
-# below, then comment out the line it replaces. Learn them one at a time.
+# The viewers are keyboard-driven:
+#   zathura  PDFs    j/k scroll, / search, + - zoom, Ctrl + R dark pages
+#   imv      images  arrows next/prev, + - zoom, f fullscreen
+#   mpv      media   space pause, arrows seek, [ ] speed
+#   yazi     files   hjkl move, enter open, q quit (also Super + E, a
+#                    scratchpad: scratchpads.nix)
+# Archives have no default: unpack them in the terminal.
+# Dolphin and VLC stay installed as backups (apps.nix), not as defaults.
 #
 # Check what opens a file type:  xdg-mime query default application/pdf
 # Find a type for a file:        xdg-mime query filetype somefile.pdf
 
 let
-  browser = "mullvad-browser.desktop";
-  pdf     = "okularApplication_pdf.desktop";
-  image   = "org.kde.gwenview.desktop";
-  media   = "vlc.desktop";
-  text    = "codium.desktop";
-  folder  = "org.kde.dolphin.desktop";
-  archive = "org.kde.ark.desktop";
+  c = (import ../../lib/palette.nix).for "zathura";
 
-  # Keyboard-driven alternatives (see home.packages below):
-  # pdf    = "org.pwmt.zathura.desktop";  # zathura: j/k scroll, / search, + - zoom
-  # media  = "mpv.desktop";               # mpv: space pause, arrows seek, [ ] speed
-  # image  = "imv.desktop";               # imv: arrows next/prev, + - zoom, f fullscreen
-  # folder = "yazi.desktop";              # yazi: hjkl move, enter open, q quit
+  browser = "mullvad-browser.desktop";
+  # zathura's PDF support is a plugin with its own entry; same zathura.
+  pdf     = "org.pwmt.zathura-pdf-mupdf.desktop";
+  image   = "imv.desktop";
+  media   = "mpv.desktop";
+  text    = "codium.desktop";
+  folder  = "yazi-folder.desktop";   # defined below
 
   # One app for a whole list of file types.
   forAll = app: types: lib.genAttrs types (_: app);
 in
 {
-  home.packages = with pkgs; [
-    # zathura
-    # mpv
-    # imv
-    # yazi
-  ];
+  programs.imv.enable = true;
+  programs.mpv.enable = true;
+  programs.yazi.enable = true;
+
+  # Your colours around the page; the pages themselves keep their own
+  # colours. Ctrl + R toggles dark pages, drawn in the same palette.
+  programs.zathura = {
+    enable = true;
+    options = {
+      default-bg = "#${c.bg}";
+      default-fg = "#${c.fg}";
+      statusbar-bg = "#${c.surf}";
+      statusbar-fg = "#${c.fg}";
+      inputbar-bg = "#${c.bg}";
+      inputbar-fg = "#${c.fg}";
+      notification-bg = "#${c.surf}";
+      notification-fg = "#${c.fg}";
+      notification-error-bg = "#${c.rust}";
+      notification-error-fg = "#${c.fg}";
+      notification-warning-bg = "#${c.surf}";
+      notification-warning-fg = "#${c.amber}";
+      completion-bg = "#${c.surf}";
+      completion-fg = "#${c.fg}";
+      completion-highlight-bg = "#${c.forest}";
+      completion-highlight-fg = "#${c.fg}";
+      highlight-color = "rgba(111,181,122,0.4)";         # forest_text, see-through
+      highlight-active-color = "rgba(217,168,91,0.5)";   # amber, see-through
+      index-bg = "#${c.bg}";
+      index-fg = "#${c.fg}";
+      index-active-bg = "#${c.forest}";
+      index-active-fg = "#${c.fg}";
+
+      recolor = false;               # pages in their normal colours
+      recolor-darkcolor = "#${c.fg}";
+      recolor-lightcolor = "#${c.bg}";
+      recolor-keephue = true;        # keep images and coloured text recognisable
+    };
+  };
+
+  # Opening a folder from another app ("show in folder" and so on): yazi at
+  # that folder, in its own ghostty window. yazi's own entry asks for "a
+  # terminal", which apps outside a full desktop often can't find, so this
+  # names ghostty outright. Its class differs from the files scratchpad's,
+  # so it opens as a normal window instead of being pulled into the pad.
+  xdg.desktopEntries.yazi-folder = {
+    name = "yazi (ghostty)";
+    comment = "Open a folder in yazi";
+    exec = "ghostty --class=dev.arlo.yazi --gtk-single-instance=false -e yazi %f";
+    terminal = false;
+    mimeType = [ "inode/directory" ];
+    noDisplay = true;   # the launcher already has yazi; this is only for opening folders
+  };
 
   xdg.mimeApps = {
     enable = true;
@@ -100,19 +147,10 @@ in
         "application/vnd.oasis.opendocument.presentation"
       ]
       // forAll folder [ "inode/directory" ]
-      // forAll archive [
-        "application/zip"
-        "application/x-tar"
-        "application/gzip"
-        "application/x-compressed-tar"
-        "application/x-7z-compressed"
-        "application/x-xz-compressed-tar"
-        "application/zstd"
-      ]
       // forAll "webapp-tuta.desktop" [ "x-scheme-handler/mailto" ];
   };
 
-  # Apps (Plasma, browsers) rewrite mimeapps.list when you pick "always open
+  # Apps (browsers, file managers) rewrite mimeapps.list when you pick "always open
   # with". This file is the source of truth, so overwrite their changes on
   # rebuild instead of failing over a stale mimeapps.list.hm-backup. To keep
   # a default you set by clicking, add it above.

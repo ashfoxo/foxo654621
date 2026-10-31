@@ -38,7 +38,7 @@ in
     # --- Media ---------------------------------------------------------------
     pkgs.feishin               # Navidrome music
     pkgs.fluent-reader         # RSS (AppImage; can't be sandboxed, see sandboxes.nix)
-    pkgs.vlc
+    pkgs.vlc                   # backup player; mpv is the default (defaults.nix)
 
     # --- DVDs: rip to MKV, then compress -------------------------------------
     # MakeMKV: lossless rip of a disc to .mkv (unfree; free key while in beta,
@@ -74,6 +74,7 @@ in
 
     # --- Tools -------------------------------------------------------------
     pkgs.ghostty
+    pkgs.kdePackages.dolphin   # backup file manager; yazi is the default (defaults.nix)
     pkgs.vscodium
     pkgs.qdirstat              # disk usage map
   ]

@@ -25,6 +25,8 @@
   { name = "vault"; key = "B"; class = "^bitwarden$"; cmd = "bitwarden"; }
   { name = "music"; key = "M"; class = "^feishin$";   cmd = "feishin"; }
   { name = "notes"; key = "N"; class = "^Notesnook$"; cmd = "notesnook"; autostart = true; }
+  { name = "files"; key = "E"; class = "^dev\\.arlo\\.files$";
+    cmd = "ghostty --class=dev.arlo.files --gtk-single-instance=false -e yazi"; }
   { name = "top";   key = "P"; class = "^dev\\.arlo\\.top$"; size = 0.9;
     cmd = "ghostty --class=dev.arlo.top --gtk-single-instance=false -e btop"; }
   { name = "torrent"; key = "D"; class = "^org\\.qbittorrent\\.qBittorrent$"; cmd = "qbittorrent"; }

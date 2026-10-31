@@ -40,6 +40,7 @@ rec {
   apps = {
     hyprland = { };
     fuzzel   = { };
+    zathura  = { };
     # Lock screen extra: a brighter rust for the failed-unlock border.
     hyprlock = {
       rust_glow = "9A4637";

@@ -132,7 +132,7 @@ in
     enable = true;
     automount = true;
     notify = true;
-    tray = "never"; # mounts show up in Dolphin; no tray icon needed
+    tray = "never"; # mounts show up in yazi or Dolphin; no tray icon needed
   };
   # Home Manager binds udiskie to graphical-session.target, which Plasma
   # starts too. Pin it to the Hyprland session.

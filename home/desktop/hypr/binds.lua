@@ -24,7 +24,6 @@ local exec = hl.dsp.exec_cmd
 ------------------
 
 bind(mod .. " + Return", exec("ghostty"),                   "Apps: Terminal")
-bind(mod .. " + E",      exec("dolphin"),                   "Apps: File manager")
 bind(mod .. " + R",      exec("fuzzel"),                    "Apps: Launcher")
 bind(mod .. " + slash",  exec("hypr-cheatsheet"),           "Help: This cheat sheet")
 
@@ -141,7 +140,7 @@ bind("XF86AudioMicMute",      exec("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle
 bind("XF86MonBrightnessUp",   exec("brightnessctl set 5%+"),                          "Media: Brightness up",    hw)
 bind("XF86MonBrightnessDown", exec("brightnessctl set 5%-"),                          "Media: Brightness down",  hw)
 
--- playerctl talks to whatever is playing (Feishin, browsers, VLC).
+-- playerctl talks to whatever is playing (Feishin, browsers, mpv).
 bind("XF86AudioPlay",  exec("playerctl play-pause"), "Media: Play or pause", { locked = true })
 bind("XF86AudioPause", exec("playerctl play-pause"), "Media: Play or pause", { locked = true })
 bind("XF86AudioNext",  exec("playerctl next"),       "Media: Next track",    { locked = true })
