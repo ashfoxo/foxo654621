@@ -79,7 +79,11 @@ in
       name = "Adwaita-dark";
       package = pkgs.gnome-themes-extra;
     };
-    gtk3.extraConfig.gtk-application-prefer-dark-theme = 1;
+    gtk3.extraConfig = {
+      gtk-application-prefer-dark-theme = 1;
+      gtk-recent-files-enabled = false;   # no "recent files" list
+    };
+    gtk4.extraConfig.gtk-recent-files-enabled = false;
   };
 
   # GTK 4 / libadwaita apps, and the GTK portal's dark-mode answer to every
@@ -90,6 +94,7 @@ in
     cursor-theme = config.home.pointerCursor.name;
     cursor-size = config.home.pointerCursor.size;
   };
+  dconf.settings."org/gnome/desktop/privacy".remember-recent-files = false;
 
   ##### Qt #####
   qt = {

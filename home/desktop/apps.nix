@@ -14,6 +14,12 @@
 #   webapps.nix        Chromium web apps (Tuta, Claude, Gmail, ...)
 #   dev.nix, filen.nix, voicenotes.nix, activitywatch.nix
 
+# TODO(audit): the unsandboxed apps below (notesnook, typora, libreoffice,
+# darktable, kdenlive, feishin, zoom) could move into nixpak sandboxes, with
+# their state in RAM where that is workable. Decide per app: documents and
+# photo libraries need a folder that survives. vscodium, bitwarden (SSH agent),
+# steam and fluent-reader (AppImage) can't be sandboxed this way.
+
 let
   sandboxes = import ./sandboxes.nix {
     inherit pkgs nixpak;
@@ -95,5 +101,24 @@ in
       run mkdir -p ${lib.escapeShellArg torrents} "$(dirname ${lib.escapeShellArg conf})"
       ${set "BitTorrent" "Session\\DefaultSavePath" torrents}
       ${set "BitTorrent" "Session\\TempPathEnabled" "false"}
+    '';
+
+  # VSCodium: no reopened windows, local file history or hot-exit backups, so
+  # less of what you worked on is left in its folders. Merged into any
+  # existing settings.json instead of replacing it.
+  home.activation.vscodiumNoTraces =
+    let settings = "${config.home.homeDirectory}/.config/VSCodium/User/settings.json";
+    in lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      run mkdir -p "$(dirname ${lib.escapeShellArg settings})"
+      [ -s ${lib.escapeShellArg settings} ] || echo '{}' > ${lib.escapeShellArg settings}
+      run ${lib.getExe pkgs.jq} '. + {
+        "window.restoreWindows": "none",
+        "workbench.localHistory.enabled": false,
+        "files.hotExit": "off",
+        "workbench.startupEditor": "none",
+        "telemetry.telemetryLevel": "off"
+      }' ${lib.escapeShellArg settings} > ${lib.escapeShellArg settings}.new \
+        && run mv ${lib.escapeShellArg settings}.new ${lib.escapeShellArg settings} \
+        || { rm -f ${lib.escapeShellArg settings}.new; echo "vscodium settings.json is not plain JSON (comments?); left as is" >&2; }
     '';
 }
