@@ -30,7 +30,7 @@
       RestartSec = 10;
     };
     # Deliberately graphical-session.target, NOT hyprland-session.target --
-    # unlike waybar and mako, you want this running in the Plasma session too.
+    # unlike the Quickshell bar, you want this running in the Plasma session too.
     Install.WantedBy = [ "graphical-session.target" ];
   };
 }

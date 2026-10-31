@@ -1405,9 +1405,6 @@ in
   # deploy comes from the workstation instead (deploy.sh), with
   # `nix flake update` first so security fixes keep landing.
   #
-  # Comes back at the end of the rebuild, pointed at codeberg.org/arlofox/
-  # beaver-red, together with its onFailure alert.
-  #
   # >>> A pinned release goes EOL silently. Calendar reminder: bump
   # >>> flake.nix to nixos-26.11 by DECEMBER 2026, and to 27.05 by JUNE 2027.
 

@@ -116,12 +116,16 @@ the sandboxes.
 
 ## Everyday use
 
-Rebuild the machine you're sitting at (the flake output must match the
-hostname):
+Rebuild the machine you're sitting at. A plain `--flake .` picks the output
+named after the hostname, which works on fox-blue:
 
 ```bash
 sudo nixos-rebuild switch --flake .
 ```
+
+fox-amber is a mobile machine, so on the network it deliberately goes by a
+generic name (`workstation`) to blend in. Its hostname doesn't match its
+flake output, so name it: `sudo nixos-rebuild switch --flake .#fox-amber`.
 
 Rebuild a specific one: `sudo nixos-rebuild switch --flake .#fox-blue`. Use
 `boot` instead of `switch` to apply at next boot.

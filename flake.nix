@@ -48,7 +48,7 @@
       # A new machine: add hosts/<name>/ and one line here.
       nixosConfigurations = {
         fox-amber   = mkHost "fox-amber";     # laptop (hostName: workstation)
-        fox-blue    = mkHost "fox-blue";      # Dad's desktop, from the T7
+        fox-blue    = mkHost "fox-blue";      # fox-blue: desktop, boots from the T7
         fox-red     = mkHost "fox-red";       # server (Hetzner VPS)
       };
     };

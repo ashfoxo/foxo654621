@@ -72,9 +72,8 @@
   };
 
   ##### Backups #####
-  # Its own bucket and its own Scaleway API key. Off until that key is in
-  # secrets.yaml (README.md, step C4): with it declared but
-  # missing, sops would refuse the whole config.
+  # Its own bucket and its own Scaleway API key (fox-blue-s3-* in
+  # secrets.yaml).
   fox.backup = {
     enable = true;
     repository = "s3:https://s3.fr-par.scw.cloud/bagger-blue/fox-blue";

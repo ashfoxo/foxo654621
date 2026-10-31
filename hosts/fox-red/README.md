@@ -1,10 +1,9 @@
-# beaver-red
+# fox-red
 
 The NixOS configuration for **fox-red**, a Hetzner VPS (4 vCPU, 8 GB RAM,
 40 GB disk, plus a 1 TB Storage Box for music). The whole server is built from
 this repo: one flake, one `configuration.nix`, encrypted secrets, and a deploy
-script. fox-red was rebuilt in place in autumn 2026; the old setup is
-archived in `redfox-server`.
+script. fox-red was rebuilt in place in autumn 2026.
 
 ## What runs here
 

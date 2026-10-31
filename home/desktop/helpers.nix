@@ -149,7 +149,7 @@ in
     grim slurp wl-clipboard   # Super + Shift + S screenshot
     brightnessctl             # brightness keys
     playerctl                 # media keys
-    pavucontrol               # audio mixer (waybar volume right-click)
-    bluetui                   # Bluetooth TUI (waybar click)
+    pavucontrol               # audio mixer (bar volume right-click)
+    bluetui                   # Bluetooth TUI (bar click)
   ]) ++ [ cheatsheet ];
 }
