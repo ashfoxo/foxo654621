@@ -72,6 +72,7 @@ let
     "njalla-token"
     "audiomuse.env"
     "forgejo-runner.env"
+    "forgejo-noreply"
   ];
 
   secHeaders = ''
@@ -189,6 +190,9 @@ in
         owner = "caddy";
         restartUnits = [ "caddy.service" ];
       };
+      # Stays root-only: systemd hands it to Forgejo (services.forgejo.secrets
+      # uses LoadCredential), so the forgejo user never reads the file itself.
+      "forgejo-noreply".restartUnits = [ "forgejo.service" ];
     }
   ];
 
@@ -872,6 +876,10 @@ in
 
     lfs.enable = true;
 
+    # Settings read from files at start-up, so the values stay out of the
+    # repo and the Nix store. Just the domain, e.g. example.net (no "@").
+    secrets.service.NO_REPLY_ADDRESS = config.sops.secrets."forgejo-noreply".path;
+
     settings = {
       server = {
         DOMAIN = "git.arlofox.net";
@@ -909,12 +917,12 @@ in
         # so read-only visitors use the https:// URL.
         REQUIRE_SIGNIN_VIEW = false;
 
-        # Public instance, so without these the account address would sit on
+        # Public instance, so without this the account address would sit on
         # the profile page and in the author field of every commit. Commits
-        # get <name>@noreply.arlofox.net instead; the real address stays for
-        # login and, if mailer is ever enabled, notifications.
+        # get <name>@<no-reply domain> instead; the real address stays for
+        # login and, if mailer is ever enabled, notifications. The no-reply
+        # domain itself (NO_REPLY_ADDRESS) is a secret, set below.
         DEFAULT_KEEP_EMAIL_PRIVATE = true;
-        NO_REPLY_ADDRESS = "noreply.arlofox.net";
       };
 
       # On for the blog: pushing to it builds and publishes arlofox.net

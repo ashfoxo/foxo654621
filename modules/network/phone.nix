@@ -14,9 +14,20 @@
     mode = "0400";
   };
 
+  # The phone's NetBird address, kept out of the repo: phone-ssh-host in
+  # secrets.yaml (just the IP). At boot sops writes a one-line
+  # "HostName <ip>" file that the Host block below pulls in. arlo's ssh
+  # reads it, so arlo owns it.
+  sops.secrets.phone-ssh-host = { };
+  sops.templates."phone-ssh-host" = {
+    content = "HostName ${config.sops.placeholder.phone-ssh-host}\n";
+    owner = "arlo";
+    mode = "0400";
+  };
+
   programs.ssh.extraConfig = ''
     Host phone ferret-amber
-      HostName 100.73.132.91
+      Include ${config.sops.templates."phone-ssh-host".path}
       Port 8022
       # NetBird builds the tunnel on first use (lazy connections), so the
       # first attempt can fail while it comes up. Retry instead of giving up.
