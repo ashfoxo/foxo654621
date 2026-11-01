@@ -29,6 +29,11 @@ let
     # --- Sandboxed apps that keep state (sandboxes.nix: state = "disk" / "logins") ---
     ".local/share/sandboxes/signal"
     ".local/share/sandboxes/librewolf"
+    ".local/share/sandboxes/telegram" ".local/share/sandboxes/vesktop"   # their logins only; the rest is in RAM
+    ".local/share/sandboxes/webapp-ente" ".local/share/sandboxes/webapp-tuta"
+    ".local/share/sandboxes/webapp-claude" ".local/share/sandboxes/webapp-elk"
+    ".local/share/sandboxes/webapp-gmail" ".local/share/sandboxes/webapp-messages"
+    ".local/share/sandboxes/webapp-appletv" ".local/share/sandboxes/webapp-spotify"
     ".local/share/sandboxes/prismlauncher"   # Minecraft worlds, synced by syncthing.nix
     ".local/share/whisper"                   # voice note speech model (public download)
 
