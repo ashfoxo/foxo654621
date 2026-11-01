@@ -84,6 +84,7 @@ in
     btop            # process monitor
     micro           # simple terminal editor
     yt-dlp
+    unzip           # extract zip files (terminal)
     cfspeedtest
     android-tools   # adb (scrcpy is in apps.nix)
 
