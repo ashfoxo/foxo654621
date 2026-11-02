@@ -36,7 +36,6 @@
   # /etc/static, which the sandboxes can't follow, so EGL on Wayland fell
   # back to Mesa's llvmpipe and Minecraft in Prism drew on the CPU. The same
   # list is in /run/opengl-driver, which they do get; point the driver there.
-  # gl-check shows what a sandbox gets.
   fox.desktop.sandboxGpuEnv = {
     __EGL_EXTERNAL_PLATFORM_CONFIG_DIRS = "/run/opengl-driver/share/egl/egl_external_platform.d";
     # GLFW over EGL (Minecraft's window on Wayland: the sandboxes have no

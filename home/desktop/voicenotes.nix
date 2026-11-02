@@ -1,17 +1,18 @@
 { pkgs, lib, ... }:
 
-# Voice notes: record, transcribe offline, drop into Notesnook.
+# Voice notes: record, transcribe offline, drop into Notesnook. Move anything
+# you want to keep out of RAM before shutting down.
 #
 #   Super + Shift + R   start recording / stop and transcribe
 #   transcribe FILE     transcribe any existing audio file (mp3, m4a, opus, wav, ...)
 #
-# Each note lands in ~/Recordings as a pair:
+# Each note lands in $XDG_RUNTIME_DIR/Recordings (RAM, gone at power-off) as a pair:
 #   2026-10-19_1432.mp3   the audio
 #   2026-10-19_1432.txt   the transcript (also copied to the clipboard)
 # Drag the audio into a Notesnook note and paste the transcript as its text.
 
 let
-  dir = "$HOME/Recordings";
+  dir = "$XDG_RUNTIME_DIR/Recordings";   # RAM (/run/user/<uid>): gone at power-off
   format = "mp3";        # output format for recordings: mp3, opus, m4a, wav, flac
   model = "base.en";     # base.en is fast on this CPU; small.en is more accurate but ~3x slower
   modelDir = "$HOME/.local/share/whisper";

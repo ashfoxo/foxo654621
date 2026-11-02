@@ -58,15 +58,13 @@ lib.mkIf cfg.enable {
     environmentFile = config.sops.templates."restic-s3-env".path;
 
     # /persist holds system state that survives reboots (impermanence).
-    # /home is a separate btrfs subvolume, so it has to be listed on its own.
-    paths = [
-      "/persist"
-      "/home/arlo"
-    ];
+    # /home/arlo is in RAM (ephemeral-home.nix); what survives is in
+    # /persist/home/arlo.
+    paths = [ "/persist" ];
 
     # Things that can be redownloaded or regenerated, so they aren't worth
     # paying to store. This is a starting guess; trim it after checking
-    # `du` output on /persist and /home/arlo.
+    # `du` output on /persist.
     exclude = [
       "**/.cache"                      # app and tool caches
       "**/.local/share/Steam"          # Steam client data
@@ -76,10 +74,9 @@ lib.mkIf cfg.enable {
       "**/.direnv"                     # per-project dev environments
       "**/result"                      # nix build output symlinks
       "/persist/nix"                   # Nix store (rebuilt from the flake)
-      "/persist/var/log"               # system logs
-      "/home/arlo/media"               # media library
-      "/home/arlo/torrents"            # torrent downloads (qBittorrent)
-      "/home/arlo/.local/share/Trash"  # deleted files
+      "/persist/home/arlo/media"               # media library
+      "/persist/home/arlo/torrents"            # torrent downloads (qBittorrent)
+      "/persist/home/arlo/.local/share/Trash"  # deleted files
     ] ++ cfg.extraExclude;
 
     # Also skip any directory containing a CACHEDIR.TAG file, which is the

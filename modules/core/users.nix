@@ -29,7 +29,5 @@
   users.users.arlo = {
     isNormalUser = true;
     extraGroups = [ "wheel" "networkmanager" "dialout" "video" "cdrom" "netbird-wt0" ];
-    # Removed authorized key for phone login into this machine
-    openssh.authorizedKeys.keys = [ ];
   };
 }

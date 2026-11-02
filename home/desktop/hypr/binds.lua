@@ -121,6 +121,8 @@ end)
 -----------------
 
 bind(mod .. " + Escape",    exec("loginctl lock-session"), "Session: Lock screen")
+-- Panic: power off now, no questions, no grace period.
+bind(mod .. " + CTRL + SHIFT + Escape", exec("systemctl poweroff -i"), "Session: PANIC power off")
 bind(mod .. " + SHIFT + E", hl.dsp.exit(),                 "Session: Log out of Hyprland")
 
 bind(mod .. " + SHIFT + S", exec('grim -g "$(slurp)" - | wl-copy'), "Screenshot: Region to clipboard")

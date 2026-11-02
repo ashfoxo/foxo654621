@@ -27,7 +27,7 @@ The server is separate and has [its own README](hosts/fox-red/README.md).
 **A wiped-every-boot root.** The disk is LUKS-encrypted btrfs with four
 subvolumes (`@root`, `@home`, `@nix`, `@persist`). At each boot `@root` is
 moved aside and replaced with an empty one, and only what's listed in
-`modules/impermanence.nix` survives. Old roots are kept for 30 days in case
+`modules/impermanence.nix` survives. Old roots are kept for 7 days in case
 you forgot to persist something. Unlocking the disk works with a FIDO2 key
 (YubiKey) or a passphrase.
 
@@ -41,9 +41,18 @@ on `Super + E`), zathura, imv and mpv. Press `Super + /` for a cheat sheet
 that reads the keybinds straight from the running compositor, so it can't
 go out of date.
 
+**A home that forgets.** `/home/arlo` is a tmpfs and is empty at every boot.
+Only the folders listed in `modules/ephemeral-home.nix` survive (they live in
+`/persist/home/arlo`). Pull the YubiKey and the screen locks; if it isn't
+back in 10 seconds the machine powers off. `Super + Ctrl + Shift + Esc`
+powers off at once, key or no key.
+
 **Sandboxed apps.** Browsers, chat apps, a torrent client and a Minecraft launcher run
 inside [nixpak](https://github.com/nixpak/nixpak) (bubblewrap) sandboxes.
-Each app gets its own fake home and a single shared folder. Web apps like
+Each app gets its own fake home and a single shared folder. Most homes live
+in RAM (`/run/sandbox-ram`, up to a quarter of memory) and are gone at
+power-off; Signal's stays on disk and LibreWolf keeps only its logins there
+(`state` in `home/desktop/sandboxes.nix`). Web apps like
 mail and a music player each get their own sandboxed Chromium window and
 profile (`home/desktop/webapps.nix`: add one line to the list and you get a
 command, a launcher entry and a workspace rule).
@@ -66,7 +75,6 @@ yearly snapshots kept. The lock screen shows when the last one succeeded.
 **Small tools.**
 - `Super + Shift + R` records a voice note and transcribes it offline with
   whisper.cpp. `transcribe FILE` does the same for existing audio.
-- ActivityWatch time tracking, merged with data pulled from a phone.
 - `send` and `fetch` copy files to and from a phone over SSH.
 - A C toolchain with clangd, sanitizers and friends (`home/desktop/dev.nix`).
 
@@ -86,7 +94,7 @@ hosts/<name>/          One folder per machine: hardware + what's unique to it
 modules/               System-level NixOS modules
   personal.nix           The bundle every laptop/desktop imports
   options.nix            The few knobs that differ per machine (fox.*)
-  core/                  Nix settings, users, SSH, hardening, locale
+  core/                  Nix settings, users, SSH, hardening, USB allowlist, time zone
   desktop/               Login (greetd) and Hyprland session, audio, fonts, system apps
   hardware/              laptop.nix (power, thermals), nvidia.nix
   network/               Mullvad + NetBird, phone file transfer
@@ -177,7 +185,7 @@ If you want to adapt the whole thing, change these first:
 - `.sops.yaml` and `hosts/fox-red/.sops.yaml` hold the owner's public age
   keys. Put in yours and replace the files in `secrets/` with your own.
 - Backup buckets, domain names, NetBird addresses (`modules/network/phone.nix`)
-  and the time zone (`modules/core/locale.nix`) are the owner's.
+  and the time zone (`modules/core/default.nix`) are the owner's.
 - `hardware-configuration.nix` in each host folder is generated for that
   specific machine. Regenerate yours with `nixos-generate-config`.
 - Disk layout assumptions: a LUKS device named `cryptroot` containing btrfs

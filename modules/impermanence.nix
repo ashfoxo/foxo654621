@@ -6,22 +6,24 @@
   boot.initrd.systemd.initrdBin = with pkgs; [ btrfs-progs findutils ];
 
   ##### Impermanence #####
-  # @root is recreated empty every boot. @home is a separate subvolume and is
-  # never touched, so everything under /home/arlo survives.
+  # @root is recreated empty every boot. /home/arlo is a tmpfs too
+  # (ephemeral-home.nix); the @home subvolume under it is not touched.
+  # Wi-Fi networks and Bluetooth pairings are kept (convenience): anyone who
+  # unlocks the disk can read the network names and device addresses. Battery
+  # history (upower) is left out on purpose: it records when the laptop ran.
   environment.persistence."/persist" = {
     hideMounts = true;
     directories = [
-      "/var/log"
       "/var/lib/nixos"                   # UID/GID allocations; without it users shift
       "/var/lib/systemd/timers"
       "/var/lib/systemd/backlight"       # brightness
       "/var/lib/systemd/rfkill"          # wifi/bluetooth soft-block state
       "/var/lib/bluetooth"               # paired devices
-      "/var/lib/upower"                  # battery history
+      "/etc/NetworkManager/system-connections"   # saved Wi-Fi
       "/var/lib/power-profiles-daemon"
       "/var/lib/fwupd"                   # firmware update history
       "/var/lib/restic-status"           # last successful backup (lock screen)
-      "/etc/NetworkManager/system-connections"
+      "/var/lib/nixos-update"            # last update result (bar)
       "/etc/mullvad-vpn"
       "/var/cache/mullvad-vpn"
       {
@@ -39,7 +41,7 @@
   };
 
   # Root wipe (systemd stage 1): move @root into old_roots, delete snapshots
-  # older than 30 days, create a fresh empty @root. The recursive delete exists
+  # older than 7 days, create a fresh empty @root. The recursive delete exists
   # because @root has nested subvolumes (srv, tmp, var/tmp, var/lib/machines,
   # var/lib/portables). -mindepth 1 keeps find from returning old_roots itself.
   boot.initrd.systemd.services.rollback = {
@@ -68,7 +70,7 @@
         btrfs subvolume delete "$1"
       }
 
-      for i in $(find /mnt/old_roots/ -mindepth 1 -maxdepth 1 -mtime +30); do
+      for i in $(find /mnt/old_roots/ -mindepth 1 -maxdepth 1 -mtime +7); do
         delete_subvolume_recursively "$i"
       done
 

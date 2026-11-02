@@ -6,6 +6,9 @@
     ./users.nix
     ./ssh.nix
     ./hardening.nix
-    ./locale.nix
+    ./usbguard.nix
+    ./yubikey-removal.nix
   ];
+
+  time.timeZone = "America/New_York";
 }

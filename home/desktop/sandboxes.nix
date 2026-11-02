@@ -17,9 +17,16 @@ let
   # the pulse socket, and screen sharing gets its stream from the portal.
   # machineId: /etc/machine-id, a permanent unique ID for this laptop. Only
   # Electron apps get it, since they complain without it.
+  # state: where the app's home lives. "ram": in /run/sandbox-ram, gone at
+  # power-off. "disk": ~/.local/share/sandboxes/<name>, kept. "logins": the
+  # disk home, but ~/.cache is in RAM (the app itself must keep history and
+  # caches off, see librewolf below). /tmp is always in RAM.
+  # persist: with state "ram", folders (relative to the home) that are kept on
+  # disk anyway, in ~/.local/share/sandboxes/<name>/<folder>: the login of the
+  # app. Folders only, since a file can't be bound before it exists.
   # extraBindRw: a function of sloth (nixpak's path helpers) returning more
   # read-write binds, e.g. sloth: [ [ host-path sandbox-path ] ].
-  makeGuiSandbox = { package, name, extraBindRw ? (sloth: []), extraDev ? [], extraEnv ? {}, rawPipeWire ? false, machineId ? false }:
+  makeGuiSandbox = { package, name, state ? "ram", persist ? [ ], extraBindRw ? (sloth: []), extraDev ? [], extraEnv ? {}, rawPipeWire ? false, machineId ? false }:
     (mkNixPak {
       config = { sloth, ... }: {
         app.package = package;
@@ -75,9 +82,11 @@ let
             # PulseAudio-compat socket (pipewire-pulse), used for mic and speakers
             (sloth.concat [ (sloth.env "XDG_RUNTIME_DIR") "/pulse" ])
 
-            # Isolate home directory state to ~/.local/share/sandboxes/<n>
+            # Isolate home directory state, in RAM or on disk (see state above)
             [
-              (sloth.mkdir (sloth.concat [ sloth.homeDir "/.local/share/sandboxes/" name ]))
+              (if state == "ram"
+               then sloth.mkdir (sloth.concat [ "/run/sandbox-ram/" name ])
+               else sloth.mkdir (sloth.concat [ sloth.homeDir "/.local/share/sandboxes/" name ]))
               sloth.homeDir
             ]
 
@@ -88,14 +97,24 @@ let
               (sloth.concat [ sloth.homeDir "/Shared" ])
             ]
 
-            # Per-app /tmp. bwrap gives the sandbox none by default, and apps
-            # that assume it exists can crash at startup (Feishin hangs on an
-            # error dialog). Host ~/.cache/sandbox-tmp/<n> -> sandbox /tmp
+            # Per-app /tmp, in RAM. bwrap gives the sandbox none by default, and
+            # apps that assume it exists can crash at startup (Feishin hangs on
+            # an error dialog). Host /run/sandbox-ram/<n>-tmp -> sandbox /tmp
             [
-              (sloth.mkdir (sloth.concat [ sloth.homeDir "/.cache/sandbox-tmp/" name ]))
+              (sloth.mkdir (sloth.concat [ "/run/sandbox-ram/" name "-tmp" ]))
               "/tmp"
             ]
           ]
+          # Over the disk home, so caches never reach the disk.
+          ++ lib.optional (state == "logins") [
+            (sloth.mkdir (sloth.concat [ "/run/sandbox-ram/" name "-cache" ]))
+            (sloth.concat [ sloth.homeDir "/.cache" ])
+          ]
+          # Kept across reboots even though the rest of the home is in RAM.
+          ++ map (p: [
+            (sloth.mkdir (sloth.concat [ sloth.homeDir "/.local/share/sandboxes/" name "/" p ]))
+            (sloth.concat [ sloth.homeDir "/" p ])
+          ]) persist
           ++ lib.optional rawPipeWire (sloth.concat [ (sloth.env "XDG_RUNTIME_DIR") "/pipewire-0" ])
           ++ extraBindRw sloth;
         };
@@ -114,6 +133,9 @@ let
       else pkgs.ungoogled-chromium;
     inherit name;
     extraEnv = { NIXOS_OZONE_WL = "1"; };
+    # The login: cookies, site storage. History and caches stay in RAM.
+    persist = map (d: ".config/chromium/Default/" + d)
+      [ "Network" "Local Storage" "IndexedDB" "Session Storage" ];
   };
 in
 {
@@ -133,7 +155,27 @@ in
     };
     name = "mullvad-browser";
   };
-  librewolf       = makeGuiSandbox { package = pkgs.librewolf;       name = "librewolf"; };
+  # The one browser that keeps logins across reboots. History, disk cache,
+  # session restore and form data are off, and cookies are not cleared at exit.
+  # shortcut: logins live in the on-disk profile; site storage persists with them.
+  librewolf = makeGuiSandbox {
+    package = pkgs.librewolf.override {
+      extraPrefs = ''
+        lockPref("places.history.enabled", false);
+        lockPref("browser.cache.disk.enable", false);
+        lockPref("browser.cache.offline.enable", false);
+        lockPref("browser.sessionstore.max_tabs_undo", 0);
+        lockPref("browser.sessionstore.resume_from_crash", false);
+        lockPref("browser.formfill.enable", false);
+        lockPref("browser.download.manager.addToRecentDocs", false);
+        lockPref("privacy.clearOnShutdown.cookies", false);
+        lockPref("privacy.clearOnShutdown_v2.cookiesAndStorage", false);
+        lockPref("network.cookie.lifetimePolicy", 0);
+      '';
+    };
+    name = "librewolf";
+    state = "logins";
+  };
 
   # Keyboard-driven browser. Its config (qutebrowser.py) is baked into the
   # package with --config-py, because the sandbox can't see ~/.config.
@@ -153,41 +195,16 @@ in
     extraEnv = { QT_QPA_PLATFORM = "wayland"; };
   };
 
-  # --- Diagnostics ---
-  # gl-check: what graphics a sandbox sees, run inside the same kind of
-  # sandbox Prism gets. For finding why Minecraft draws on the CPU on
-  # NVIDIA (fox-blue). Installed only where sandboxGpuDevices is set.
-  gl-check = makeGuiSandbox {
-    name = "gl-check";
-    package = pkgs.writeShellApplication {
-      name = "gl-check";
-      runtimeInputs = with pkgs; [ coreutils findutils gnugrep mesa-demos ];
-      text = ''
-        echo "== devices"
-        ls -l /dev/nvidia* /dev/dri 2>&1 || true
-        echo "== NVIDIA's EGL plugin list (\$__EGL_EXTERNAL_PLATFORM_CONFIG_DIRS)"
-        ls "''${__EGL_EXTERNAL_PLATFORM_CONFIG_DIRS:-/etc/egl/egl_external_platform.d}/" 2>&1 || true
-        echo "== /proc/driver/nvidia"
-        head -1 /proc/driver/nvidia/version 2>&1 || true
-        echo "== environment"
-        env | grep -E '^(DISPLAY|WAYLAND_DISPLAY|XDG_SESSION_TYPE|__GLX|__EGL|LIBVA|NVD|GBM|LD_LIBRARY)' || true
-        echo "== driver libraries visible"
-        find /run/opengl-driver/lib -maxdepth 1 -name '*nvidia*' 2>&1 | head -5 || true
-        echo "== GLX (Minecraft on X11)"
-        glxinfo -B 2>&1 | head -15 || true
-        echo "== EGL (Minecraft on Wayland)"
-        eglinfo -B 2>&1 | grep -iE 'platform|vendor|renderer|error|fail' | head -20 || true
-      '';
-    };
-  };
-
   # --- Gaming ---
-  prismlauncher    = makeGuiSandbox { package = pkgs.prismlauncher;    name = "prismlauncher"; };
+  prismlauncher    = makeGuiSandbox { package = pkgs.prismlauncher;    name = "prismlauncher"; state = "disk"; };  # worlds; synced by syncthing.nix
 
   # --- Communication ---
-  vesktop          = makeGuiSandbox { package = pkgs.vesktop;          name = "vesktop"; rawPipeWire = true; machineId = true; };
-  telegram-desktop = makeGuiSandbox { package = pkgs.telegram-desktop; name = "telegram"; };
-  signal-desktop   = makeGuiSandbox { package = pkgs.signal-desktop;   name = "signal"; machineId = true; };
+  vesktop          = makeGuiSandbox { package = pkgs.vesktop;          name = "vesktop"; rawPipeWire = true; machineId = true;
+    persist = [ ".config/vesktop/Local Storage" ".config/vesktop/Network" ".config/vesktop/IndexedDB" ".config/vesktop/settings" ]; };
+  telegram-desktop = makeGuiSandbox { package = pkgs.telegram-desktop; name = "telegram";
+    persist = [ ".local/share/TelegramDesktop/tdata" ]; };
+  # Signal's login and message database are one store: it stays on disk.
+  signal-desktop   = makeGuiSandbox { package = pkgs.signal-desktop;   name = "signal"; machineId = true; state = "disk"; };
 
   # --- Downloads ---
   # qBittorrent downloads into ~/torrents, the same path inside and outside
